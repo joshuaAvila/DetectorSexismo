@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import re
-import pysentimiento
+#import pysentimiento
 
 
 from pysentimiento.preprocessing import preprocess_tweet
@@ -20,7 +20,6 @@ if torch.cuda.is_available():
 else:
     print('No GPU available, using the CPU instead.')
     device = torch.device("cpu")
-
     
 consumer_key = "BjipwQslVG4vBdy4qK318KnoA"
 consumer_secret = "3fzL70v9faklrPgvTi3zbofw9rwk92fgGdtAslFkFYt8kGmqBJ"
