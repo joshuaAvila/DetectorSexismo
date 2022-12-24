@@ -2,9 +2,10 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import re
+import pysentimiento
 
 
-#from pysentimiento.preprocessing import preprocess_tweet
+from pysentimiento.preprocessing import preprocess_tweet
 
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 from transformers import AutoTokenizer, AutoModelForSequenceClassification,AdamW
