@@ -1,6 +1,42 @@
 import streamlit as st
+import pandas as pd
+import torch
+import numpy as np
+import re
+from pysentimiento.preprocessing import preprocess_tweet
 
+from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
+from transformers import AutoTokenizer, AutoModelForSequenceClassification,AdamW
+tokenizer = AutoTokenizer.from_pretrained('hackathon-pln-es/twitter_sexismo-finetuned-robertuito-exist2021')
+model = AutoModelForSequenceClassification.from_pretrained("hackathon-pln-es/twitter_sexismo-finetuned-robertuito-exist2021")
 
+import torch
+if torch.cuda.is_available():  
+    device = torch.device(	"cuda")
+    print('I will use the GPU:', torch.cuda.get_device_name(0))
+    
+else:
+    print('No GPU available, using the CPU instead.')
+    device = torch.device("cpu")
+
+    
+from pysentimiento.preprocessing import preprocess_tweet
+
+from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
+from transformers import AutoTokenizer, AutoModelForSequenceClassification,AdamW
+tokenizer = AutoTokenizer.from_pretrained('hackathon-pln-es/twitter_sexismo-finetuned-robertuito-exist2021')
+model = AutoModelForSequenceClassification.from_pretrained("hackathon-pln-es/twitter_sexismo-finetuned-robertuito-exist2021")
+
+import torch
+if torch.cuda.is_available():  
+    device = torch.device(	"cuda")
+    print('I will use the GPU:', torch.cuda.get_device_name(0))
+    
+else:
+    print('No GPU available, using the CPU instead.')
+    device = torch.device("cpu")
+
+    
 def highlight_survived(s):
     return ['background-color: red']*len(s) if (s.Sexista == 1) else ['background-color: green']*len(s)
 
