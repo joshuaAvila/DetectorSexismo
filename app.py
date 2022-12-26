@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import re
+import pysentimiento
 
 from pysentimiento.preprocessing import preprocess_tweet
 
