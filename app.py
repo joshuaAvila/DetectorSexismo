@@ -1,6 +1,15 @@
 
 import streamlit as st
 
+def highlight_survived(s):
+    return ['background-color: red']*len(s) if (s.Sexista == 1) else ['background-color: green']*len(s)
+
+def color_survived(val):
+    color = 'red' if val=='Sexista' else 'white'
+    return f'background-color: {color}'                
+
+st.set_page_config(layout="wide")
+st.markdown('<style>body{background-color: Blue;}</style>',unsafe_allow_html=True)
 
 colT1,colT2 = st.columns([2,8])
 with colT2:
@@ -22,8 +31,7 @@ with colT2:
 def run():   
  with st.form("my_form"):
    col,buff1, buff2 = st.columns([2,2,1])
-   st.write("Inside the form")
-   checkbox_val = st.checkbox("Form checkbox")
+   st.write("Escoja una Opción")
    search_words = col.text_input("Introduzca el termino o usuario para analizar y pulse el check correspondiente")
    number_of_tweets = col.number_input('Introduzca número de twweets a analizar. Máximo 50', 0,50,10)
    termino=st.checkbox('Término')
