@@ -18,8 +18,9 @@ with colT2:
     font-size:16px ; font-family: 'Times New Roman'; color: #3358ff;} 
     </style> """, unsafe_allow_html=True)
 
-      
-  with st.form("my_form"):
+   
+def run():   
+ with st.form("my_form"):
    st.write("Inside the form")
    slider_val = st.slider("Form slider")
    checkbox_val = st.checkbox("Form checkbox")
@@ -31,3 +32,5 @@ with colT2:
 
 st.write("Outside the form")    
       
+
+run()
