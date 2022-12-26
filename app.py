@@ -4,7 +4,7 @@ import streamlit as st
 
 colT1,colT2 = st.columns([2,8])
 with colT2:
-    st.title('Analisis de comentarios sexistas en Twitter') 
+   # st.title('Analisis de comentarios sexistas en Twitter') 
     st.markdown(""" <style> .font {
     font-size:40px ; font-family: 'Cooper Black'; color: #FF9633;} 
     </style> """, unsafe_allow_html=True)
