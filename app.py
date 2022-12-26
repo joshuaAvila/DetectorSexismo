@@ -21,16 +21,24 @@ with colT2:
    
 def run():   
  with st.form("my_form"):
+   col,buff1, buff2 = st.columns([2,2,1])
    st.write("Inside the form")
    slider_val = st.slider("Form slider")
    checkbox_val = st.checkbox("Form checkbox")
-
-   # Every form must have a submit button.
-   submitted = st.form_submit_button("Submit")
-   if submitted:
-       st.write("slider", slider_val, "checkbox", checkbox_val)
-
-st.write("Outside the form")    
+   search_words = col.text_input("Introduzca el termino o usuario para analizar y pulse el check correspondiente")
+   number_of_tweets = col.number_input('Introduzca número de twweets a analizar. Máximo 50', 0,50,10)
+   termino=st.checkbox('Término')
+   usuario=st.checkbox('Usuario')
+   submit_button = col.form_submit_button(label='Analizar')
+   error=False
+   if submit_button:
+            date_since = "2020-09-14"
+            if ( termino == False and usuario == False):
+                st.text('Error no se ha seleccionado ningun check')
+                error=True
+            elif ( termino == True and usuario == True):
+                st.text('Error se han seleccionado los dos check')
+                error=True 
       
 
 run()
