@@ -23,7 +23,6 @@ def run():
  with st.form("my_form"):
    col,buff1, buff2 = st.columns([2,2,1])
    st.write("Inside the form")
-   slider_val = st.slider("Form slider")
    checkbox_val = st.checkbox("Form checkbox")
    search_words = col.text_input("Introduzca el termino o usuario para analizar y pulse el check correspondiente")
    number_of_tweets = col.number_input('Introduzca número de twweets a analizar. Máximo 50', 0,50,10)
