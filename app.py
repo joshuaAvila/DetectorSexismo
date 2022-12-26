@@ -2,7 +2,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import regex as re
+import re
 
 def highlight_survived(s):
     return ['background-color: red']*len(s) if (s.Sexista == 1) else ['background-color: green']*len(s)
