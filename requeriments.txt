@@ -1,0 +1,5 @@
+tweepy==4.6.0
+torch
+pandas
+pysentimiento
+transformers
