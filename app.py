@@ -15,7 +15,7 @@ colT1,colT2 = st.columns([2,8])
 with colT2:
    # st.title('Analisis de comentarios sexistas en Twitter') 
     st.markdown(""" <style> .font {
-    font-size:40px ; font-family: 'Cooper Black'; color: #FF9633;} 
+    font-size:40px ; font-family: 'Cooper Black'; color: #06bf69;} 
     </style> """, unsafe_allow_html=True)
     st.markdown('<p class="font">Análisis de comentarios sexistas en Twitter</p>', unsafe_allow_html=True)
     
