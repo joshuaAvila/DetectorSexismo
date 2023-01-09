@@ -5,7 +5,7 @@ import re
 
 #from pysentimiento.preprocessing import preprocess_tweet
 
-from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
+#from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 from transformers import AutoTokenizer, AutoModelForSequenceClassification,AdamW
 tokenizer = AutoTokenizer.from_pretrained('hackathon-pln-es/twitter_sexismo-finetuned-robertuito-exist2021')
 model = AutoModelForSequenceClassification.from_pretrained("hackathon-pln-es/twitter_sexismo-finetuned-robertuito-exist2021")
