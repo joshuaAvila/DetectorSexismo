@@ -94,8 +94,9 @@ def run():
                 error=True
             elif ( termino == True and usuario == True):
                 st.text('Error se han seleccionado los dos check')
-                error=True 
-            
+                error=True
+                
+                
              if (error == False):
                 if (termino):
                     new_search = search_words + " -filter:retweets"
@@ -151,6 +152,8 @@ def run():
                 
                 
                 st.table(df.reset_index(drop=True).head(20).style.applymap(color_survived, subset=['Sexista']))
+
+             
 
 
 run()
