@@ -95,7 +95,8 @@ def run():
             elif ( termino == True and usuario == True):
                 st.text('Error se han seleccionado los dos check')
                 error=True 
-      if (error == False):
+            
+             if (error == False):
                 if (termino):
                     new_search = search_words + " -filter:retweets"
                     tweets =tw.Cursor(api.search_tweets,q=new_search,lang="es",since=date_since).items(number_of_tweets)
