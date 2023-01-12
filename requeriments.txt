@@ -1,9 +1,0 @@
-tweepy==4.6.0
-torch==1.9.0
-pandas==1.2.5
-pysentimiento==0.5.2
-transformers
-numpy==1.24.0
-tweet-preprocessor == 0.6.0
-
-

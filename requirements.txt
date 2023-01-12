@@ -1,0 +1,8 @@
+tweepy
+torch
+pandas
+pysentimiento
+transformers
+numpy
+
+
