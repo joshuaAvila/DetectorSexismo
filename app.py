@@ -14,6 +14,15 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification,AdamW
 tokenizer = AutoTokenizer.from_pretrained('hackathon-pln-es/twitter_sexismo-finetuned-robertuito-exist2021')
 model = AutoModelForSequenceClassification.from_pretrained("hackathon-pln-es/twitter_sexismo-finetuned-robertuito-exist2021")
 
+import torch
+if torch.cuda.is_available():  
+    device = torch.device(	"cuda")
+    print('I will use the GPU:', torch.cuda.get_device_name(0))
+    
+else:
+    print('No GPU available, using the CPU instead.')
+    device = torch.device("cpu")
+    
     
 consumer_key = "BjipwQslVG4vBdy4qK318KnoA"
 consumer_secret = "3fzL70v9faklrPgvTi3zbofw9rwk92fgGdtAslFkFYt8kGmqBJ"
