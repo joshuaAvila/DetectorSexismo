@@ -5,4 +5,5 @@ pysentimiento
 transformers
 numpy
 regex
+geopy
 
