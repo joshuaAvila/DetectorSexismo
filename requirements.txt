@@ -1,9 +1,10 @@
-tweepy
-torch
+tweepy 
 pandas
-pysentimiento
+torch
 transformers
 numpy
 regex
+pysentimiento
 geopy
+matplotlib
 
