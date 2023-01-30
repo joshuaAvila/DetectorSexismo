@@ -6,6 +6,7 @@ import numpy as np
 import regex as re
 import pysentimiento
 import geopy
+import matplotlib.pyplot as plt
 
 from pysentimiento.preprocessing import preprocess_tweet
 from geopy.geocoders import Nominatim
@@ -197,17 +198,20 @@ def analizar_frase(frase):
   text['Prediccion'] = np.where(text['Prediccion'] == 0 , 'No Sexista', 'Sexista')
 
 
-  tabla = st.table(text.reset_index(drop=True).head(30).style.applymap(color_survived, subset=['Prediccion']))
+  tabla = st.table(text.reset_index(drop=True).head(50).style.applymap(color_survived, subset=['Prediccion']))
     
   return tabla
 
 def tweets_localidad(buscar_localidad):
   geolocator = Nominatim(user_agent="nombre_del_usuario")
   location = geolocator.geocode(buscar_localidad)
-  radius = "200km"
-  tweets = api.search(lang="es",geocode=f"{location.latitude},{location.longitude},{radius}", count = 50)
-  #for tweet in tweets:
-  #  print(tweet.text)
+  radius = "10km"
+  tweets = api.search_tweets(q="",lang="es",geocode=f"{location.latitude},{location.longitude},{radius}", count = 50)
+  localidad = [i.user.location for i in tweets] 
+  text_localidad = pd.DataFrame(localidad)  
+  username = [i.user.screen_name for i in tweets] 
+  text_user= pd.DataFrame(username)
+ 
   tweet_list = [i.text for i in tweets]
   text= pd.DataFrame(tweet_list)
   text[0] = text[0].apply(preprocess_tweet)
@@ -250,16 +254,16 @@ def tweets_localidad(buscar_localidad):
   
   probability = np.amax(logits1,axis=1).flatten()
   Tweets =['Últimos 50 Tweets'+' de '+ buscar_localidad]
-  df = pd.DataFrame(list(zip(text1, flat_predictions,probability)), columns = ['Tweets' , 'Prediccion','Probabilidad'])
+  df = pd.DataFrame(list(zip(text1, localidad,username, flat_predictions,probability)), columns = ['Tweets' ,'Localidad' , 'Usuario','Prediccion','Probabilidad'])
   
   df['Prediccion']= np.where(df['Prediccion']== 0, 'No Sexista', 'Sexista')
   #df['Tweets'] = df['Tweets'].str.replace('RT|@', '')
-  #df_filtrado = df[df["Sexista"] == 'Sexista']
+  df_filtrado = df[df["Prediccion"]=="Sexista" ]
   #df['Tweets'] = df['Tweets'].apply(lambda x: re.sub(r'[:;][-o^]?[)\]DpP3]|[(/\\]|[\U0001f600-\U0001f64f]|[\U0001f300-\U0001f5ff]|[\U0001f680-\U0001f6ff]|[\U0001f1e0-\U0001f1ff]','', x))
   
   tabla = st.table(df.reset_index(drop=True).head(50).style.applymap(color_survived, subset=['Prediccion']))
     
-  df_sexista = df[df['Sexista']=="Sexista"]
+  df_sexista = df[df['Prediccion']== 'Sexista']
   df_no_sexista = df[df['Probabilidad'] > 0]
   sexista = len(df_sexista)
   no_sexista = len(df_no_sexista)
@@ -272,18 +276,18 @@ def tweets_localidad(buscar_localidad):
   plt.ylabel('Cantidad de tweets')
   plt.title('Cantidad de tweets sexistas y no sexistas')
   plt.show()
-
+  st.pyplot()
+  st.set_option('deprecation.showPyplotGlobalUse', False)
+    
   return df
 
-
-
-    
+ 
 def run():   
  with st.form("my_form"):
    col,buff1, buff2 = st.columns([2,2,1])
    st.write("Escoja una Opción")
    search_words = col.text_input("Introduzca el termino, usuario o localidad para analizar y pulse el check correspondiente")
-   number_of_tweets = col.number_input('Introduzca número de tweets a analizar. Máximo 50', 0,50,10)
+   number_of_tweets = col.number_input('Introduzca número de tweets a analizar. Máximo 50', 0,50,0)
    termino=st.checkbox('Término')
    usuario=st.checkbox('Usuario')
    localidad=st.checkbox('Localidad')
