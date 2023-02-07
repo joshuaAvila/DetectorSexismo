@@ -106,10 +106,11 @@ def analizar_tweets(search_words, number_of_tweets):
           df = df[df["Prediccion"] == 'Sexista']
           df = df[df["Probabilidad"] > 0.5]
           if df.empty:
-              st.text("No hay tweets a analizar")
+              muestra= st.text("No hay tweets a analizar")
+              tabla.append(muestra)
           else:
               muestra = st.table(df.reset_index(drop=True).head(30).style.applymap(color_survived, subset=['Prediccion']))
-              #tabla.append(muestra)
+              tabla.append(muestra)
               #resultado=df.groupby('Prediccion')['Probabilidad'].sum()
               #colores=["#aae977","#EE3555"]
               #fig, ax = plt.subplots(figsize=(2, 1), subplotpars=None)
@@ -122,13 +123,13 @@ def analizar_tweets(search_words, number_of_tweets):
               #st.set_option('deprecation.showPyplotGlobalUse', False)
               #st.pyplot()
       except Exception as e:
-          st.text(f"La cuenta {search_words} no existe.") 
-           
+          muestra = st.text(f"La cuenta {search_words} no existe.") 
+          tabla.append(muestra) 
   else:
-      st.text("Ingrese los parametros correspondientes")
-
-  
-  return muestra
+      muestra= st.text("Ingrese los parametros correspondientes")
+      tabla.append(muestra)
+        
+  return tabla
 
 def tweets_localidad(buscar_localidad):
     tabla = []
@@ -154,21 +155,25 @@ def tweets_localidad(buscar_localidad):
         #muestra = st.table(df.reset_index(drop=True).head(5).style.applymap(color_survived, subset=['Prediccion']))
         
         if df.empty:
-            st.text("No se encontraron tweets sexistas dentro de la localidad")
+            muestra=st.text("No se encontraron tweets sexistas dentro de la localidad")
+            tabla.append(muestra)
         else:
             #tabla.append(muestra)
+            df.sort_values(by=['Prediccion', 'Probabilidad'], ascending=[False, False], inplace=True)
             df['Prediccion'] = np.where(df['Prediccion'] == 'LABEL_1', 'Sexista', 'No Sexista')
-            df = df[df["Prediccion"] == 'Sexista']
-            df = df[df["Probabilidad"] > 0.5]
-            df = df.sort_values(by='Probabilidad', ascending=False)
-            muestra = st.table(df.reset_index(drop=True).head(5).style.applymap(color_survived, subset=['Prediccion']))
-            resultado=df.groupby('Prediccion')['Probabilidad'].sum()
-            colores=["#aae977","#EE3555"]
+            #df = df[df["Prediccion"] == 'Sexista']
+            #df = df[df["Probabilidad"] > 0.5]
+            #df = df.sort_values(by='Probabilidad', ascending=False)
+            df['Probabilidad'] = df['Probabilidad'].apply(lambda x: round(x, 3))
+            muestra = st.table(df.reset_index(drop=True).head(10).style.applymap(color_survived, subset=['Prediccion']))
+            tabla.append(muestra)
+            resultado=df.groupby('Prediccion')['Probabilidad'].mean()
+            colores=["#EE3555","#aae977"]
             fig, ax = plt.subplots()
-            fig.set_size_inches(2, 1)
-            plt.pie(resultado,labels=resultado.index,autopct='%1.1f%%',colors=colores, textprops={'fontsize': 2})
-            ax.set_title("Porcentajes por Categorias", fontsize=3, fontweight="bold")
-            plt.rcParams.update({'font.size':3, 'font.weight':'bold'})
+            fig.set_size_inches(2, 2)
+            plt.pie(resultado,labels=resultado.index,autopct='%1.1f%%',colors=colores,  textprops={'fontsize': 4})
+            ax.set_title("Porcentajes por Categorias", fontsize=5, fontweight="bold")
+            plt.rcParams.update({'font.size':4, 'font.weight':'bold'})
             ax.legend()
             # Muestra el gráfico
             plt.show()
@@ -176,14 +181,16 @@ def tweets_localidad(buscar_localidad):
             st.pyplot()
         
     except AttributeError as e:
-        st.text("No existe ninguna localidad con ese nombre") 
+        muestra=st.text("No existe ninguna localidad con ese nombre") 
+        tabla.append(muestra)
                  
-    return muestra 
+    return tabla 
     
 def analizar_frase(frase):
+
     if frase == "":
-        #tabla = st.text("Ingrese una frase")
-        st.text("Ingrese una frase")
+        tabla = st.text("Ingrese una frase")
+        #st.text("Ingrese una frase")
     else:
         predictions = pipeline_nlp(frase)
         # convierte las predicciones en una lista de diccionarios
