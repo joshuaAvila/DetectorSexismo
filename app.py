@@ -166,7 +166,7 @@ def tweets_localidad(buscar_localidad):
             colores=["#aae977","#EE3555"]
             fig, ax = plt.subplots()
             fig.set_size_inches(2, 1)
-            plt.pie(resultado,labels=resultado.index,autopct='%1.1f%%',colors=colores, fontsize=2)
+            plt.pie(resultado,labels=resultado.index,autopct='%1.1f%%',colors=colores, textprops={'fontsize': 2})
             ax.set_title("Porcentajes por Categorias", fontsize=3, fontweight="bold")
             plt.rcParams.update({'font.size':3, 'font.weight':'bold'})
             ax.legend()
