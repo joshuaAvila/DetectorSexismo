@@ -133,7 +133,7 @@ def analizar_tweets(search_words, number_of_tweets):
               df.sort_values(by=['Prediccion', 'Probabilidad'], ascending=[False, False], inplace=True)
               df['Prediccion'] = np.where(df['Prediccion'] == 'LABEL_1', 'Sexista', 'No Sexista')
               df['Probabilidad'] = df['Probabilidad'].apply(lambda x: round(x, 3))
-              muestra = st.table(df.reset_index(drop=True).head(30).style.applymap(color_survived, subset=['Prediccion']))
+              muestra = st.table(df.reset_index(drop=True).head(10).style.applymap(color_survived, subset=['Prediccion']))
               tabla.append(muestra)
       except Exception as e:
           muestra = st.text(f"La cuenta {search_words} no existe.") 
