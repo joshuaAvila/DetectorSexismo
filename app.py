@@ -223,8 +223,8 @@ def analizar_frase(frase):
         df['Prediccion'] = np.where( df['Prediccion'] == 'LABEL_1', 'Sexista', 'No Sexista')
         # muestra el DataFrame
         tabla = st.table(df.reset_index(drop=True).head(1).style.applymap(color_survived, subset=['Prediccion']))
-        else:
-            tabla = st.text("Solo Frase en español")
+    else:
+       tabla = st.text("Solo Frase en español")
         
     return tabla
     
