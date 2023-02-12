@@ -127,7 +127,7 @@ def analizar_tweets(search_words, number_of_tweets):
                       pass   
           df = pd.DataFrame(result)
           if df.empty:
-              muestra= st.text("No hay tweets Sexistas a analizar")
+              muestra= st.text("No hay tweets a analizar")
               tabla.append(muestra)
           else:
               df.sort_values(by=['Prediccion', 'Probabilidad'], ascending=[False, False], inplace=True)
@@ -158,25 +158,19 @@ def tweets_localidad(buscar_localidad):
             elif not tweet.full_text.strip():
                 continue
             else:
-                datos = preprocess(tweet.full_text)
+                datos = clean_tweet(tweet.full_text)
                 prediction = pipeline_nlp(datos)
                 for predic in prediction:
                     etiqueta = {'Tweets': datos,'Prediccion': predic['label'], 'Probabilidad': predic['score']}
                     result.append(etiqueta)
-        df = pd.DataFrame(result)
-        
-        #muestra = st.table(df.reset_index(drop=True).head(5).style.applymap(color_survived, subset=['Prediccion']))
-        
+        df = pd.DataFrame(result)       
         if df.empty:
             muestra=st.text("No se encontraron tweets sexistas dentro de la localidad")
             tabla.append(muestra)
         else:
-            #tabla.append(muestra)
+
             df.sort_values(by=['Prediccion', 'Probabilidad'], ascending=[False, False], inplace=True)
             df['Prediccion'] = np.where(df['Prediccion'] == 'LABEL_1', 'Sexista', 'No Sexista')
-            #df = df[df["Prediccion"] == 'Sexista']
-            #df = df[df["Probabilidad"] > 0.5]
-            #df = df.sort_values(by='Probabilidad', ascending=False)
             df['Probabilidad'] = df['Probabilidad'].apply(lambda x: round(x, 3))
             muestra = st.table(df.reset_index(drop=True).head(10).style.applymap(color_survived, subset=['Prediccion']))
             tabla.append(muestra)
