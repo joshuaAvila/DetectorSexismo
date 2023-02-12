@@ -6,11 +6,13 @@ import numpy as np
 import pysentimiento
 import geopy
 import matplotlib.pyplot as plt
+import langdetect
 
 
 from pysentimiento.preprocessing import preprocess_tweet
 from geopy.geocoders import Nominatim
 from transformers import pipeline
+from langdetect import detect
 
 
 model_checkpoint = "hackathon-pln-es/twitter_sexismo-finetuned-robertuito-exist2021" 
@@ -51,7 +53,23 @@ def preprocess(text):
     text=re.sub(r"\)","",text)
     text=" ".join(text.split())
     return text
-
+    
+def clean_tweet(tweet):
+    # Eliminar emojis
+    tweet = re.sub(r'[\U0001F600-\U0001F64F]', '', tweet)
+    tweet = re.sub(r'[\U0001F300-\U0001F5FF]', '', tweet)
+    tweet = re.sub(r'[\U0001F680-\U0001F6FF]', '', tweet)
+    tweet = re.sub(r'[\U0001F1E0-\U0001F1FF]', '', tweet)
+    # Eliminar arrobas
+    tweet = re.sub(r'@\w+', '', tweet)
+    # Eliminar URL
+    tweet = re.sub(r'http\S+', '', tweet)
+    # Eliminar hashtags
+    tweet = re.sub(r'#\w+', '', tweet)
+    # Eliminar caracteres especiales
+    #tweet = re.sub(r'[^a-zA-Z0-9 \n\.]', '', tweet)
+    tweet = re.sub(r'[^a-zA-Z0-9 \n\áéíóúÁÉÍÓÚñÑ.]', '', tweet)
+    return tweet
 
 def highlight_survived(s):
     return ['background-color: red']*len(s) if (s.Sexista == 1) else ['background-color: green']*len(s)
@@ -93,35 +111,30 @@ def analizar_tweets(search_words, number_of_tweets):
               if (tweet.full_text.startswith('RT')):
                   continue
               else:
-                  datos = preprocess(tweet.full_text)
-                  if datos == "":
-                      continue 
-                  else:
-                      prediction = pipeline_nlp(datos)
-                      for predic in prediction:
-                          etiqueta = {'Tweets': datos,'Prediccion': predic['label'], 'Probabilidad': predic['score']}
-                          result.append(etiqueta)         
+                  text = tweet.full_text
+                  try:
+                      language = detect(text)
+                      if language == 'es':
+                          datos=clean_tweet(text)
+                          if datos == "":
+                              continue
+                          else:
+                              prediction = pipeline_nlp(datos)
+                              for predic in prediction:
+                                etiqueta = {'Tweets': datos, 'Prediccion': predic['label'], 'Probabilidad': predic['score']}
+                                result.append(etiqueta)
+                  except:
+                      pass   
           df = pd.DataFrame(result)
-          df['Prediccion'] = np.where( df['Prediccion'] == 'LABEL_1', 'Sexista', 'No Sexista')
-          df = df[df["Prediccion"] == 'Sexista']
-          df = df[df["Probabilidad"] > 0.5]
           if df.empty:
-              muestra= st.text("No hay tweets a analizar")
+              muestra= st.text("No hay tweets Sexistas a analizar")
               tabla.append(muestra)
           else:
+              df.sort_values(by=['Prediccion', 'Probabilidad'], ascending=[False, False], inplace=True)
+              df['Prediccion'] = np.where(df['Prediccion'] == 'LABEL_1', 'Sexista', 'No Sexista')
+              df['Probabilidad'] = df['Probabilidad'].apply(lambda x: round(x, 3))
               muestra = st.table(df.reset_index(drop=True).head(30).style.applymap(color_survived, subset=['Prediccion']))
               tabla.append(muestra)
-              #resultado=df.groupby('Prediccion')['Probabilidad'].sum()
-              #colores=["#aae977","#EE3555"]
-              #fig, ax = plt.subplots(figsize=(2, 1), subplotpars=None)
-              #plt.pie(resultado,labels=resultado.index,autopct='%1.1f%%',colors=colores)
-              #ax.set_title("Porcentajes por Categorias", fontsize=2, fontweight="bold")
-              #plt.rcParams.update({'font.size':2, 'font.weight':'bold'})
-              #ax.legend()
-              # Muestra el gráfico
-              #plt.show()
-              #st.set_option('deprecation.showPyplotGlobalUse', False)
-              #st.pyplot()
       except Exception as e:
           muestra = st.text(f"La cuenta {search_words} no existe.") 
           tabla.append(muestra) 
@@ -179,6 +192,16 @@ def tweets_localidad(buscar_localidad):
             plt.show()
             st.set_option('deprecation.showPyplotGlobalUse', False)
             st.pyplot()
+            
+            #plt.bar(resultado.index, resultado, color=colores)
+            #ax.set_title("Porcentajes por Categorias", fontsize=5, fontweight="bold")
+            #plt.rcParams.update({'font.size':4, 'font.weight':'bold'})
+            #ax.set_xlabel("Categoría")
+            #ax.set_ylabel("Probabilidad")
+            # Muestra el gráfico
+            #plt.show()
+            #st.set_option('deprecation.showPyplotGlobalUse', False)
+            #st.pyplot()
         
     except AttributeError as e:
         muestra=st.text("No existe ninguna localidad con ese nombre") 
@@ -187,11 +210,11 @@ def tweets_localidad(buscar_localidad):
     return tabla 
     
 def analizar_frase(frase):
-
+    language = detect(frase)
     if frase == "":
         tabla = st.text("Ingrese una frase")
         #st.text("Ingrese una frase")
-    else:
+    elif language == 'es':
         predictions = pipeline_nlp(frase)
         # convierte las predicciones en una lista de diccionarios
         data = [{'Texto': frase, 'Prediccion': prediction['label'], 'Probabilidad': prediction['score']} for prediction in predictions]
@@ -199,7 +222,9 @@ def analizar_frase(frase):
         df = pd.DataFrame(data)
         df['Prediccion'] = np.where( df['Prediccion'] == 'LABEL_1', 'Sexista', 'No Sexista')
         # muestra el DataFrame
-        tabla = st.table(df.reset_index(drop=True).head(5).style.applymap(color_survived, subset=['Prediccion']))
+        tabla = st.table(df.reset_index(drop=True).head(1).style.applymap(color_survived, subset=['Prediccion']))
+        else:
+            tabla = st.text("Solo Frase en español")
         
     return tabla
     
