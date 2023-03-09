@@ -67,17 +67,19 @@ st.markdown(""" <style> .font {
 font-size:40px ; font-family: 'Cooper Black'; color: #301E67;} 
 </style> """, unsafe_allow_html=True)
 
-st.markdown('<p class="font">Análisis de comentarios sexistas en linea</p>', unsafe_allow_html=True)
+#st.markdown('<p class="font"; style="text-align: center;>Análisis de comentarios sexistas en linea</p>', unsafe_allow_html=True)
+st.markdown('<p class="font" style="text-align: center;">Detectando el Sexismo en Linea: Un proyecto de Investigación</p>', unsafe_allow_html=True)
+
     
 st.markdown(""" <style> .font1 {
 font-size:28px ; font-family: 'Times New Roman'; color: #8d33ff;} 
 </style> """, unsafe_allow_html=True)
 
 st.markdown(""" <style> .font2 {
-font-size:16px ; font-family: 'Times New Roman'; color: #5B8FB9;} 
+font-size:18px ; font-family: 'Times New Roman'; color: #5B8FB9;} 
 </style> """, unsafe_allow_html=True)
 
-st.markdown('<p class="font2">Este proyecto consiste en una aplicación web que utiliza la biblioteca Tweepy de Python para descargar tweets de Twitter, permitiendo buscar Tweets por usuario y por localidad. Luego, utiliza modelos de lenguaje basados en Transformers para analizar los tweets y detectar comentarios sexistas. Los resultados se almacenan en un dataframe para su posterior visualización y análisis. El objetivo del proyecto es identificar y proporcionar información sobre el discurso sexista en línea para combatir la discriminación y el acoso hacia las mujeres y otros grupos marginados, y así informar políticas y prácticas que promuevan la igualdad de género y la inclusión.</p>',unsafe_allow_html=True)
+st.markdown('<p class="font2">Este proyecto consiste en una aplicación web que utiliza la biblioteca Tweepy de Python para descargar tweets de Twitter, permitiendo buscar Tweets por usuario y por localidad. Luego, utiliza modelos de lenguaje basados en Transformers para analizar los tweets y detectar comentarios y determinar si son "Sexistas" o "No Sexistas". El proyecto busca identificar y combatir el discurso sexista en línea para promover la igualdad de género y la inclusión.</p>',unsafe_allow_html=True)
 
 
 def tweets_usuario(usuario, cant_de_tweets):
@@ -114,15 +116,19 @@ def tweets_usuario(usuario, cant_de_tweets):
               df.sort_values(by=['Prediccion', 'Probabilidad'], ascending=[False, False], inplace=True)
               df['Prediccion'] = np.where(df['Prediccion'] == 'LABEL_1', 'Sexista', 'No Sexista')
               df['Probabilidad'] = df['Probabilidad'].apply(lambda x: round(x, 3))
-              muestra = st.table(df.reset_index(drop=True).head(30).style.applymap(color_survived, subset=['Prediccion']))
+              muestra = st.table(df.reset_index(drop=True).head(50).style.applymap(color_survived, subset=['Prediccion']))
+              if len(df) > 10:
+                  # Agregar una barra de desplazamiento vertical a la tabla
+                  muestra._parent.markdown(f'<style>.dataframe .data {{height: 300px; overflow: scroll}}</style>', unsafe_allow_html=True)
               tabla.append(muestra)
       except Exception as e:
-          muestra = st.text(f"La cuenta {search_words} no existe.") 
+          muestra = st.text(f"La cuenta {usuario} no existe.") 
           tabla.append(muestra) 
   else:
       muestra= st.text("Ingrese los parametros correspondientes")
       tabla.append(muestra)      
   return tabla
+
 
 def tweets_localidad(buscar_localidad):
     tabla = []
@@ -130,7 +136,7 @@ def tweets_localidad(buscar_localidad):
         geolocator = Nominatim(user_agent="nombre_del_usuario")
         location = geolocator.geocode(buscar_localidad)
         radius = "15km"
-        tweets = api.search_tweets(q="",lang="es",geocode=f"{location.latitude},{location.longitude},{radius}", count = 1000, tweet_mode="extended")
+        tweets = api.search_tweets(q="",lang="es",geocode=f"{location.latitude},{location.longitude},{radius}", count = 100, tweet_mode="extended")
         result = []
         for tweet in tweets:
             if (tweet.full_text.startswith('RT')):
@@ -149,43 +155,49 @@ def tweets_localidad(buscar_localidad):
             tabla.append(muestra)
         else:
             #tabla.append(muestra)
-            #df.sort_values(by=['Prediccion', 'Probabilidad'], ascending=[False, False], inplace=True)
-            df.sort_values(by='Prediccion', ascending=False, inplace=True)
+            df.sort_values(by=['Prediccion', 'Probabilidad'], ascending=[False, False], inplace=True)
+            #df.sort_values(by='Probabilidad', ascending=False, inplace=True)
+            #df.sort_values(by='Prediccion', ascending=False, inplace=True)
             df['Prediccion'] = np.where(df['Prediccion'] == 'LABEL_1', 'Sexista', 'No Sexista')
             df['Probabilidad'] = df['Probabilidad'].round(3)
-            muestra = st.table(df.reset_index(drop=True).head(10).style.applymap(color_survived, subset=['Prediccion']))
-            tabla.append(muestra)
-            #resultado=df.groupby('Prediccion')['Probabilidad'].sum()
-            with st.container():
-                resultado = df['Prediccion'].head(10).value_counts()
-                colores=["#EE3555","#aae977"]
+            # Obtener los datos con probabilidad mayor a 0.50
+            df = df[df['Probabilidad'] > 0.50]
+            # Obtener los 3 primeros datos con mayor probabilidad sexista
+            sexista_df = df[df['Prediccion'] == 'Sexista'].head(3)
+            
+            # Obtener los 3 primeros datos con mayor probabilidad no sexista
+            no_sexista_df = df[df['Prediccion'] == 'No Sexista'].head(3)
+            
+            # Concatenar ambos dataframes
+            muestra_df = pd.concat([sexista_df, no_sexista_df], axis=0)
+            col1, col2 = st.columns(2)
+            with col1:
+                muestra = st.table(muestra_df.reset_index(drop=True).head(6).style.applymap(color_survived, subset=['Prediccion']))
+            with col2:
+                resultado = df['Prediccion'].value_counts()
+                def autopct_fun(abs_values):
+                    gen = iter(abs_values)
+                    return lambda pct: f"{pct:.1f}% ({next(gen)})"
+                    
+                colores=["#aae977","#EE3555"]
                 fig, ax = plt.subplots()
-                fig.set_size_inches(2, 2)
-                plt.pie(resultado,labels=resultado.index,autopct='%1.1f%%',colors=colores,  textprops={'fontsize': 4})
-                ax.set_title("Porcentajes por Categorias", fontsize=5, fontweight="bold")
+                fig.set_size_inches(2,2)
+                plt.pie(resultado,labels=resultado.index,autopct=autopct_fun(resultado),colors=colores,  textprops={'fontsize': 5})
+                ax.set_title("Porcentajes por Categorias en la localidad\n"+buscar_localidad.capitalize(), fontsize=5, fontweight="bold")
                 plt.rcParams.update({'font.size':4, 'font.weight':'bold'})
                 ax.legend()
                 # Muestra el gráfico
                 plt.show()
                 st.set_option('deprecation.showPyplotGlobalUse', False)
                 st.pyplot()
-            
-            plt.bar(resultado.index, resultado, color=colores)
-            ax.set_title("Porcentajes por Categorias", fontsize=5, fontweight="bold")
-            plt.rcParams.update({'font.size':4, 'font.weight':'bold'})
-            ax.set_xlabel("Categoría")
-            ax.set_ylabel("Probabilidad")
-            # Muestra el gráfico
-            plt.show()
-            st.set_option('deprecation.showPyplotGlobalUse', False)
-            st.pyplot()
-        
+
     except AttributeError as e:
         muestra=st.text("No existe ninguna localidad con ese nombre") 
         tabla.append(muestra)
                  
     return tabla 
     
+   
 def analizar_frase(frase):
     language = detect(frase)
     if frase == "":
@@ -204,20 +216,20 @@ def analizar_frase(frase):
         tabla = st.text("Solo Frase en español")
         
     return tabla
-    
-def run():   
- with st.form("my_form"):
-   col,buff1, buff2 = st.columns([2,2,1])
-   st.write("Escoja una Opción")
-   search_words = col.text_input("Introduzca la frase, el usuario o localidad para analizar y pulse el check correspondiente")
-   number_of_tweets = col.number_input('Introduzca número de tweets a analizar del usuario Máximo 50', 0,50,0)
-   termino=st.checkbox('Frase')
-   usuario=st.checkbox('Usuario')
-   localidad=st.checkbox('Localidad')
-   submit_button = col.form_submit_button(label='Analizar')
-   error =False
-  
-   if submit_button:
+
+def run():
+    #col1, col2 = st.columns(2)
+    with st.form("my_form"):
+        search_words = st.text_input("Introduzca la frase, el usuario o localidad para analizar y pulse el check correspondiente")
+        number_of_tweets = st.number_input('Introduzca número de tweets a analizar del usuario Máximo 50', 0,50,0)
+        st.write("Escoja una Opción:")
+        termino=st.checkbox('Frase')
+        usuario=st.checkbox('Usuario')
+        localidad=st.checkbox('Localidad')
+        submit_button = st.form_submit_button(label='Analizar')
+        error =False
+           
+        if submit_button:
             # Condición para el caso de que esten dos check seleccionados
             if ( termino == False and usuario == False and localidad == False):
                 st.text('Error no se ha seleccionado ningun check')
@@ -225,14 +237,13 @@ def run():
             elif ( termino == True and usuario == True and localidad == True):
                 st.text('Error se han seleccionado varios check')
                 error=True
-                
-            if (error == False):
-                if (termino):
-                  analizar_frase(search_words)
-                    
-                elif (usuario):
-                    tweets_usuario(search_words,number_of_tweets)
-                elif (localidad):
-                    tweets_localidad(search_words)
-     
+                   
+        if (error == False):
+          if (termino):
+              analizar_frase(search_words)
+          elif (usuario):
+              tweets_usuario(search_words,number_of_tweets)
+          elif (localidad):
+              tweets_localidad(search_words)
+   
 run()
