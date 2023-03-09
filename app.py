@@ -1,3 +1,4 @@
+#Librerias
 import tweepy as tw
 import streamlit as st
 import pandas as pd
@@ -14,11 +15,11 @@ from geopy.geocoders import Nominatim
 from transformers import pipeline
 from langdetect import detect
 
-
+#Modelo Pyusentimiento
 model_checkpoint = "hackathon-pln-es/twitter_sexismo-finetuned-robertuito-exist2021" 
 pipeline_nlp = pipeline("text-classification", model=model_checkpoint)
 
-    
+#claves de acceso para descargar datos de Twitter
 consumer_key = "BjipwQslVG4vBdy4qK318KnoA"
 consumer_secret = "3fzL70v9faklrPgvTi3zbofw9rwk92fgGdtAslFkFYt8kGmqBJ"
 access_token = "1217853705086799872-Y5zEChpTeKccuLY3XJRXDPPZhNrlba"
@@ -27,6 +28,7 @@ auth = tw.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
 api = tw.API(auth, wait_on_rate_limit=True)
    
+#Función para limpieza de datos
 def limpieza_datos(tweet):
     # Eliminar emojis
     tweet = re.sub(r'[\U0001F600-\U0001F64F]', '', tweet)
@@ -44,6 +46,7 @@ def limpieza_datos(tweet):
     tweet = re.sub(r'[^a-zA-Z0-9 \n\áéíóúÁÉÍÓÚñÑ.]', '', tweet)
     return tweet
 
+#funcion para cambiar el color en caso de que salga "Sexista" un mensaje
 def highlight_survived(s):
     return ['background-color: red']*len(s) if (s.Sexista == 1) else ['background-color: green']*len(s)
 
@@ -52,25 +55,19 @@ def color_survived(val):
     return f'background-color: {color}'
 
 
+#Funcion para configurar la pagina con Streamlit
 st.set_page_config(layout="wide")
 st.markdown('<style>body{background-color: Blue;}</style>',unsafe_allow_html=True)
-
-#st.markdown('<style>body{background-color: Blue;}</style>',unsafe_allow_html=True)
-#colT1,colT2 = st.columns([2,8])
-st.markdown(""" <style> .fondo {
-background-image: url("https://www.google.com/url?sa=i&url=https%3A%2F%2Flasmujereseneldeportemexicano.wordpress.com%2F2016%2F11%2F17%2Fpor-que-es-importante-hablar-de-genero%2F&psig=AOvVaw0xG7SVXtJoEpwt-fF5Kykt&ust=1676431557056000&source=images&cd=vfe&ved=0CBAQjRxqFwoTCJiu-a6IlP0CFQAAAAAdAAAAABAJ");
-background-size: 180%;} 
-</style> """, unsafe_allow_html=True)
 
 
 st.markdown(""" <style> .font {
 font-size:40px ; font-family: 'Cooper Black'; color: #301E67;} 
 </style> """, unsafe_allow_html=True)
 
-#st.markdown('<p class="font"; style="text-align: center;>Análisis de comentarios sexistas en linea</p>', unsafe_allow_html=True)
+#Titulo de la pagina
 st.markdown('<p class="font" style="text-align: center;">Detectando el Sexismo en Linea: Un proyecto de Investigación</p>', unsafe_allow_html=True)
 
-    
+
 st.markdown(""" <style> .font1 {
 font-size:28px ; font-family: 'Times New Roman'; color: #8d33ff;} 
 </style> """, unsafe_allow_html=True)
@@ -78,10 +75,10 @@ font-size:28px ; font-family: 'Times New Roman'; color: #8d33ff;}
 st.markdown(""" <style> .font2 {
 font-size:18px ; font-family: 'Times New Roman'; color: #5B8FB9;} 
 </style> """, unsafe_allow_html=True)
-
+#mensaje corto de la pagina
 st.markdown('<p class="font2">Este proyecto consiste en una aplicación web que utiliza la biblioteca Tweepy de Python para descargar tweets de Twitter, permitiendo buscar Tweets por usuario y por localidad. Luego, utiliza modelos de lenguaje basados en Transformers para analizar los tweets y detectar comentarios y determinar si son "Sexistas" o "No Sexistas". El proyecto busca identificar y combatir el discurso sexista en línea para promover la igualdad de género y la inclusión.</p>',unsafe_allow_html=True)
 
-
+#Función para analizar mensajes de usuario de Twitter con el modelo pysentimiento
 def tweets_usuario(usuario, cant_de_tweets):
   tabla = []
   if(cant_de_tweets > 0 and usuario != "" ):
@@ -129,7 +126,7 @@ def tweets_usuario(usuario, cant_de_tweets):
       tabla.append(muestra)      
   return tabla
 
-
+#Función para analizar mensajes de Twitter mediante una localidad con el modelo pysentimiento
 def tweets_localidad(buscar_localidad):
     tabla = []
     try:
@@ -197,7 +194,7 @@ def tweets_localidad(buscar_localidad):
                  
     return tabla 
     
-   
+ #Función para analizar solo una frase con el modelo pysentimiento
 def analizar_frase(frase):
     language = detect(frase)
     if frase == "":
@@ -216,9 +213,9 @@ def analizar_frase(frase):
         tabla = st.text("Solo Frase en español")
         
     return tabla
-
+#Aquí se corre el formulario de la pagina web
 def run():
-    #col1, col2 = st.columns(2)
+    #Formulario
     with st.form("my_form"):
         search_words = st.text_input("Introduzca la frase, el usuario o localidad para analizar y pulse el check correspondiente")
         number_of_tweets = st.number_input('Introduzca número de tweets a analizar del usuario Máximo 50', 0,50,0)
@@ -228,7 +225,7 @@ def run():
         localidad=st.checkbox('Localidad')
         submit_button = st.form_submit_button(label='Analizar')
         error =False
-           
+        #condiciones
         if submit_button:
             # Condición para el caso de que esten dos check seleccionados
             if ( termino == False and usuario == False and localidad == False):
@@ -237,7 +234,7 @@ def run():
             elif ( termino == True and usuario == True and localidad == True):
                 st.text('Error se han seleccionado varios check')
                 error=True
-                   
+        #Condiciones para llamar a las funciones      
         if (error == False):
           if (termino):
               analizar_frase(search_words)
